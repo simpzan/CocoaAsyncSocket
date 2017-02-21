@@ -2314,7 +2314,8 @@ enum GCDAsyncSocketConfig
 		#pragma clang diagnostic warning "-Wimplicit-retain-self"
 			
 			NSError *lookupErr = nil;
-			NSMutableArray *addresses = [[self class] lookupHost:hostCpy port:port error:&lookupErr];
+			NSMutableArray *addresses = [[self class] lookupHost:hostCpy port:port ipv6Enabled:[self isIPv6Enabled]
+                                                           error:&lookupErr];
 			
 			__strong GCDAsyncSocket *strongSelf = weakSelf;
 			if (strongSelf == nil) return_from_block;
@@ -8179,7 +8180,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 #pragma mark Class Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-+ (NSMutableArray *)lookupHost:(NSString *)host port:(uint16_t)port error:(NSError **)errPtr
++ (NSMutableArray *)lookupHost:(NSString *)host port:(uint16_t)port ipv6Enabled:(BOOL)ipv6Enabled error:(NSError **)errPtr
 {
 	LogTrace();
 	
@@ -8220,7 +8221,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 		struct addrinfo hints, *res, *res0;
 		
 		memset(&hints, 0, sizeof(hints));
-		hints.ai_family   = PF_UNSPEC;
+		hints.ai_family   = ipv6Enabled ? AF_UNSPEC : AF_INET;
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_protocol = IPPROTO_TCP;
 		

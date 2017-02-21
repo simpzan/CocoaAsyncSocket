@@ -1024,7 +1024,7 @@ typedef NS_ENUM(NSInteger, GCDAsyncSocketError) {
  *   The addresses are specifically for TCP connections.
  *   You can filter the addresses, if needed, using the other utility methods provided by the class.
 **/
-+ (nullable NSMutableArray *)lookupHost:(NSString *)host port:(uint16_t)port error:(NSError **)errPtr;
++ (NSMutableArray *)lookupHost:(NSString *)host port:(uint16_t)port ipv6Enabled:(BOOL)ipv6Enabled error:(NSError **)errPtr;
 
 /**
  * Extracting host and port information from raw address data.
