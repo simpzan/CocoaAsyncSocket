@@ -2578,8 +2578,17 @@ enum GCDAsyncSocketConfig
 		[self closeWithError:[self otherError:msg]];
 		return;
 	}
-	
-	// Start the normal connection process
+
+    // notify dns completion.
+    __strong id theDelegate = delegate;
+    if (delegateQueue && theDelegate && [theDelegate respondsToSelector:@selector(socket:didLookupWithAddress4:address6:)])
+    {
+        dispatch_async(delegateQueue, ^{ @autoreleasepool {
+            [theDelegate socket:self didLookupWithAddress4:address4 address6:address6];
+        }});
+    }
+
+    // Start the normal connection process
 	
 	NSError *err = nil;
 	if (![self connectWithAddress4:address4 address6:address6 error:&err])

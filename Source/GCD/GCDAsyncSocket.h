@@ -1090,6 +1090,11 @@ typedef NS_ENUM(NSInteger, GCDAsyncSocketError) {
 - (void)socket:(GCDAsyncSocket *)sock didAcceptNewSocket:(GCDAsyncSocket *)newSocket;
 
 /**
+ * Called when a dns completes.
+**/
+- (void)socket:(GCDAsyncSocket *)sock didLookupWithAddress4:(nullable NSData *)address4 address6:(nullable NSData *)address6;
+
+/**
  * Called when a socket connects and is ready for reading and writing.
  * The host parameter will be an IP address, not a DNS name.
 **/
