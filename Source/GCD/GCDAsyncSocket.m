@@ -109,6 +109,52 @@ static const int logLevel = GCDAsyncSocketLogLevel;
 #define SOCKET_NULL -1
 
 
+static NSString *interfaceOfAddress(NSString *ip) {
+    struct ifaddrs *interfaces = NULL;
+    int result = getifaddrs(&interfaces);
+    if (result != 0) {
+        LogError(@"getifaddrs error, %s", strerror(errno));
+        return NULL;
+    }
+    
+    const char *theAddr = [ip cStringUsingEncoding:NSUTF8StringEncoding];
+    NSString *interfaceName = NULL;
+    for (struct ifaddrs *itr = interfaces; itr; itr = itr->ifa_next) {
+        if (itr->ifa_addr->sa_family != AF_INET) continue;
+        
+        struct sockaddr_in *inAddr = (struct sockaddr_in *)itr->ifa_addr;
+        const char *addr = inet_ntoa(inAddr->sin_addr);
+        if (strcmp(addr, theAddr) != 0) continue;
+
+        interfaceName = [NSString stringWithUTF8String:itr->ifa_name];
+        break;
+    }
+    freeifaddrs(interfaces);
+    return interfaceName;
+}
+static int boundSocketToInterface(int socket, NSString *address) {
+    NSString *name = interfaceOfAddress(address);
+    if (!name) {
+        LogInfo(@"interface not found for '%@'", address);
+        return -1;
+    }
+    
+    int index = if_nametoindex([name cStringUsingEncoding:NSUTF8StringEncoding]);
+    if (index == 0) {
+        LogError(@"if_nametoindex error, %s", strerror(errno));
+        return -1;
+    }
+    
+    int status = setsockopt(socket, IPPROTO_IP, IP_BOUND_IF, &index, sizeof(index));
+    if (status == -1) {
+        LogError(@"setsockopt IP_BOUND_IF error, %s", strerror(errno));
+        return -1;
+    }
+    LogInfo(@"set interface '%@' IP_BOUND_IF ok.", name);
+    return 0;
+}
+
+
 NSString *const GCDAsyncSocketException = @"GCDAsyncSocketException";
 NSString *const GCDAsyncSocketErrorDomain = @"GCDAsyncSocketErrorDomain";
 
@@ -1486,7 +1532,7 @@ enum GCDAsyncSocketConfig
 		}
 		
 		// Bind socket
-		
+		boundSocketToInterface(socketFD, inInterface);
 		status = bind(socketFD, (const struct sockaddr *)[interfaceAddr bytes], (socklen_t)[interfaceAddr length]);
 		if (status == -1)
 		{
