@@ -1532,7 +1532,7 @@ enum GCDAsyncSocketConfig
 		}
 		
 		// Bind socket
-		boundSocketToInterface(socketFD, inInterface);
+		if (interface) boundSocketToInterface(socketFD, interface);
 		status = bind(socketFD, (const struct sockaddr *)[interfaceAddr bytes], (socklen_t)[interfaceAddr length]);
 		if (status == -1)
 		{
