@@ -1065,7 +1065,8 @@ enum GCDAsyncSocketConfig
 			[self closeWithError:nil];
 		});
 	}
-	
+	[self unmarkSocketQueueTargetQueue:socketQueue];
+    
 	delegate = nil;
 	
 	#if !OS_OBJECT_USE_OBJC
