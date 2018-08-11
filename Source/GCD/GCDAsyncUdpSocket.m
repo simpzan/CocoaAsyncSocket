@@ -461,7 +461,8 @@ enum GCDAsyncUdpSocketConfig
 	if (delegateQueue) dispatch_release(delegateQueue);
 	#endif
 	delegateQueue = NULL;
-	
+
+    [self unmarkSocketQueueTargetQueue:socketQueue];
 	#if !OS_OBJECT_USE_OBJC
 	if (socketQueue) dispatch_release(socketQueue);
 	#endif
